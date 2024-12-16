@@ -131,6 +131,7 @@
     <ClCompile Include="globals.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="globalClasses.h" />
     <ClInclude Include="header.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

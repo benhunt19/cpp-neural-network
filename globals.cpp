@@ -2,6 +2,8 @@
 #include <vector>
 #include <string>
 
+// define global functions here
+
 using namespace std;
 
 void testFunc() {
