@@ -1,6 +1,8 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <fstream>
+#include "header.h"
 
 // define global functions here
 
@@ -17,7 +19,7 @@ void testFunc() {
 		cout << j << endl;
 	}
 
-	int x[20] = {1,2,3,4,5};
+	int x[20] = { 1,2,3,4,5 };
 
 	cout << x << endl;
 
@@ -28,6 +30,5 @@ void testFunc() {
 		cout << *(iter) << endl;
 		iter++;
 	}
-	
-	
+
 };
