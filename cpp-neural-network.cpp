@@ -8,13 +8,17 @@
 using namespace std;
 
 /*GLOBALS*/
-
-const string path = "C:/Users/benhu/.cache/kagglehub/datasets/hojjatk/mnist-dataset/versions/1/train-images-idx3-ubyte";
-const string filename = "/train-images-idx3-ubyte";
+// Images
+const string trainImagesPath = "C:/Users/benhu/PycharmProjects/Data Sets/mnist-dataset/versions/1/train-images-idx3-ubyte";
+const string trainImagesFile = "/train-images-idx3-ubyte";
+// Labels
+const string trainLabelsPath = "C:/Users/benhu/PycharmProjects/Data Sets/mnist-dataset/versions/1/train-labels-idx3-ubyte";
+const string trainLabelsFile = "/train-labels-idx3-ubyte";
 
 int main()
 {
-	ifstream stream = FileUtils::getFileFromPath(path, filename);
-	cout << stream.peek() << endl;
+	File imagesTest = File(trainImagesPath, trainImagesFile);
+	imagesTest.printImageAtIndex(210);
+	imagesTest.getImage(10);
 	return 1;
 }
