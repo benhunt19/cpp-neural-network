@@ -21,21 +21,28 @@ int main()
 	File labelData = File(trainLabelsPath, trainLabelsFile);
 
 	int start_index = 0;
-	int end_index = 5000;
+	int end_index = 50;
 
 	vector<Image> training_images = trainingData.getImageVector(start_index, end_index);
 	vector<char> training_labels = labelData.getLabelVector(start_index, end_index);
 
-	// pair images and labels;
+	// zip together the images and their corresponding files
 	for (int i = start_index; i < end_index; i++) {
 		training_images[i].setLabel(training_labels[i]);
 	}
 	
-	for (int i = 0; i < 10; i++) {
-		cout << int(training_images[i].label) << endl;
-		training_images[i].print();
-	}
+	//for (int i = 0; i < 3; i++) {
+	//	cout << int(training_images[i].label) << endl;
+	//	training_images[i].print();
+	//}
 
+	// create the neural network
+	NeuralNetwork nn = NeuralNetwork({ trainingData.image_size, 10, 10 });
+	
+	nn.printNodeValues(2, 9);
+	nn.trainVector(training_images);
+	nn.printLayerVals(1);
+	nn.printLayerVals(2);
 
 	return 1;
 }
