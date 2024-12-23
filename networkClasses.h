@@ -31,6 +31,7 @@ public:
 	int layer = 0;
 	int index = 0;
 	float tmp_value = 0.0f; // used to store value on an iteration through
+	float z = 0.0f;         // used in forward and back propegation
 
 
 	Neuron(vector<int>& shape, int& layer_index, int& node_index) {
@@ -50,11 +51,15 @@ public:
 					{ 'b', 0 }					  // bias delta
 				};
 			};
-		}
+		};
 	};
 
 	void setValue(float value) {
 		tmp_value = value;
+	};
+	
+	void setZ(float value) {
+		z = value;
 	};
 
 	void printData() {
@@ -62,7 +67,16 @@ public:
 			for (auto x : data[i]) {
 				cout << x.first << ' ' << x.second << ' ';
 			}
-			cout << "\n";
+			cout << endl;
+		};
+	};
+
+	void printDelta() {
+		for (int i = 1; i < data_delta.size(); i++) {
+			for (auto x : data_delta[i]) {
+				cout << x.first << ' ' << x.second << ' ';
+			}
+			cout << endl;
 		};
 	};
 
@@ -96,8 +110,10 @@ class NetworkLayer {
 public:
 	vector<Neuron> neurons;
 	string activation;
-	NetworkLayer(vector<int>& shape, int& index, string activation_in) {
+	float alpha;
+	NetworkLayer(vector<int>& shape, int& index, string activation_in, float alpha_in) {
 		activation = activation_in;
+		alpha = alpha_in;
 		if (index < shape.size()) {
 			for (int i = 0; i < shape[index]; i++) {
 				neurons.push_back(Neuron(shape, index, i));
@@ -113,16 +129,17 @@ class NeuralNetwork {
 public:
 	vector<NetworkLayer> layers;
 	// to initialise the NN
+	const float alpha = 0.1; // global learning rate
 	NeuralNetwork(vector<int> shape) {
 		for (int i = 0; i < shape.size(); i++) {
 			if (i < shape.size() - 1) {
 				// Use RElU activation for all but last layer
-				layers.push_back(NetworkLayer(shape, i, RElU_const));
+				layers.push_back(NetworkLayer(shape, i, RElU_const, alpha));
 			}
 			else {
 				// use softmax for the final layer,
 				// ensure it sums to one as in probability
-				layers.push_back(NetworkLayer(shape, i, softMax_const));
+				layers.push_back(NetworkLayer(shape, i, softMax_const, alpha));
 			}
 
 		};
@@ -153,11 +170,10 @@ public:
 		image.print();
 
 		// FORWARD PROPAGATION
-
 		// Initiate the zeroth layer...
 		for (int i = 0; i < layers[0].neurons.size(); i++) {
 			layers[0].neurons[i].setValue(
-				(float)image.image_data[i] / maxPixles // normalise pixles
+				(float)image.image_data[i] / maxPixles // normalise pixles [0, 1]
 			);
 		}
 
@@ -173,7 +189,7 @@ public:
 					// Z = W.*A + b
 					z += layers[j].neurons[k].data[l]['w'] * layers[j - 1].neurons[k].tmp_value + layers[j].neurons[k].data[l]['b'];
 				};
-				layers[j].neurons[k].setValue(z);
+				layers[j].neurons[k].setZ(z);
 			};
 			// Potential activation functions:
 			// 'RElU'
@@ -184,7 +200,7 @@ public:
 			if (layers[j].activation == "RElU") {
 				for (int k = 0; k < layers[j].neurons.size(); k++) {
 					layers[j].neurons[k].setValue(
-						RElU(layers[j].neurons[k].tmp_value)
+						RElU(layers[j].neurons[k].z)
 					);
 				};
 			}
@@ -220,7 +236,23 @@ public:
 				layers[fin_index].neurons[x].setDeltaBias(y, dz_fin[y]);
 			};
 		};
+
 		// 3. process the remaining network layers...
+		// working backward from the second last layer
+		vector<float> dz;
+		vector<float> dz_previous;
+		if (fin_index - 1 > 0) {
+			// for each remaining layer greater than the zeroth...
+			for (int l = fin_index - 1; l > 0; l--) {
+				// dz[i] = W[i+1] * dz[i+1] * g'(z[i]) // with i being the layer...
+				dz.resize(layers[l].neurons.size());
+				// time 10.21
+				// dw[i] = 1/m * dz[i] * X (input layer)
+				// ...
+				// db[i] = 1/m 8 sum(dz[i])
+				// ...
+			}
+		}
 
 	};
 

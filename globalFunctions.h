@@ -32,12 +32,18 @@ T RElU(T x) {
 	return max(T(0), x);
 };
 
+// 1b. RElU prime (heaviside step)
+template <typename T>
+T heaviside(T x) {
+	return T(x) >= 0 ? 1 : 0;
+};
+
 // 2. softMax (exponential probability)
 template <typename N>
 float softMax(vector<N>& vec, int index) {
 	float sum = 0;
 	for (int i = 0; i < vec.size(); i++) {
-		sum += exp(vec[i].tmp_value);
+		sum += exp(vec[i].z);
 	}
-	return exp(vec[index].tmp_value) / sum;
+	return exp(vec[index].z) / sum;
 }
