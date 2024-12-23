@@ -23,10 +23,13 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="header.h">
+    <ClInclude Include="globalFunctions.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="globalClasses.h">
+    <ClInclude Include="fileClasses.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="networkClasses.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

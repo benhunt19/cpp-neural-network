@@ -34,11 +34,10 @@ T RElU(T x) {
 
 // 2. softMax (exponential probability)
 template <typename N>
-float softMax(vector<N>& vec, int& index) {
-	float numerator = exp(vec[index].tmp_value);
-	float denominator = 0;
+float softMax(vector<N>& vec, int index) {
+	float sum = 0;
 	for (int i = 0; i < vec.size(); i++) {
-		denominator += exp(vec[i].tmp_value);
+		sum += exp(vec[i].tmp_value);
 	}
-	return numerator / denominator;
+	return exp(vec[index].tmp_value) / sum;
 }
