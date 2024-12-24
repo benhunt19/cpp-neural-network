@@ -17,17 +17,26 @@ public:
 	//[
 	//	{
 	//		'w': 0.45,
-	//		'b': 0.88
+	//		'b': 0.88,
+	//		'dw': 0.02,
+	//		'db': 0.90
 	//	},
 	//	{
 	//		'w': 0.15,
 	//		'b': 0.80
+	//		'dw': 0.02,
+	//		'db': 0.90
 	//	},
-	// ... etc...
+	// ...
 	//] 
 	// 
-	vector<map<char, float>> data;
-	vector<map<char, float>> data_delta;
+	struct connection {
+		float w;
+		float b;
+		float dw;
+		float db;
+	};
+	vector<connection> data;
 	int layer = 0;
 	int index = 0;
 	float tmp_value = 0.0f; // used to store value on an iteration through
@@ -40,16 +49,11 @@ public:
 		if (layer_index != 0 && layer_index < shape.size()) {
 			// resize data and data_delta
 			data.resize(shape[layer_index - 1]);
-			data_delta.resize(shape[layer_index - 1]);
 			for (int i = 0; i < shape[layer_index - 1]; i++) {
-				data[i] = {
-					{ 'w', uniformRandom(-1, 1) }, // weights
-					{ 'b', uniformRandom(-1, 1) }  // bias
-				};
-				data_delta[i] = {
-					{ 'w', 0 },				      // weights delta
-					{ 'b', 0 }					  // bias delta
-				};
+				data[i].w = uniformRandom(-0.5, 0.5);
+				data[i].b = uniformRandom(-0.5, 0.5);
+				data[i].dw = 0;
+				data[i].db = 0;
 			};
 		};
 	};
@@ -64,36 +68,25 @@ public:
 
 	void printData() {
 		for (int i = 1; i < data.size(); i++) {
-			for (auto x : data[i]) {
-				cout << x.first << ' ' << x.second << ' ';
-			}
-			cout << endl;
+			cout << data[i].w << " " << data[i].b << " " << data[i].dw << " " << data[i].db  << endl;
 		};
 	};
 
-	void printDelta() {
-		for (int i = 1; i < data_delta.size(); i++) {
-			for (auto x : data_delta[i]) {
-				cout << x.first << ' ' << x.second << ' ';
-			}
-			cout << endl;
-		};
-	};
 
 	void setWeight(int index, float value) {
-		data[index]['w'] = value;
+		data[index].w = value;
 	};
 
 	void setBias(int index, float value) {
-		data[index]['b'] = value;
+		data[index].b = value;
 	};
 	
 	void setDeltaWeight(int index, float value) {
-		data_delta[index]['w'] = value;
+		data[index].dw = value;
 	};
 
 	void setDeltaBias(int index, float value) {
-		data_delta[index]['b'] = value;
+		data[index].db = value;
 	};
 
 
@@ -153,11 +146,6 @@ public:
 		}
 	}
 
-	void printNodeValues(int layer, int neuron) {
-		cout << "Layer: " << layer << " ,index: " << neuron << endl;
-		layers[layer].neurons[neuron].printData();
-	}
-
 	void printLayerVals(int layer_index) {
 		cout << "Current node values for layer: " << layer_index << endl;
 		for (int i = 0; i < layers[layer_index].neurons.size(); i++) {
@@ -165,15 +153,13 @@ public:
 		}
 	}
 
-	void train(Image& image) {
-		cout << "Training data on: " << endl;
-		image.print();
+	void forwardPropagation(Image& image) {
 
 		// --- FORWARD PROPAGATION ---
 		// Initiate the zeroth layer...
 		for (int i = 0; i < layers[0].neurons.size(); i++) {
 			layers[0].neurons[i].setValue(
-				(float)image.image_data[i] / maxPixles // normalise pixles [0, 1]
+				(float)image.image_data[i] / maxPixels // normalise pixles [0, 1]
 			);
 		}
 
@@ -187,7 +173,7 @@ public:
 				z = 0;
 				for (int l = 0; l < layers[j].neurons[k].data.size(); l++) {
 					// Z = W.*A + b
-					z += layers[j].neurons[k].data[l]['w'] * layers[j - 1].neurons[k].tmp_value + layers[j].neurons[k].data[l]['b'];
+					z += layers[j].neurons[k].data[l].w * layers[j - 1].neurons[k].tmp_value + layers[j].neurons[k].data[l].b;
 				};
 				layers[j].neurons[k].setZ(z);
 			};
@@ -197,14 +183,16 @@ public:
 			// 'tanh'
 			// 'softMax'
 			// Activation function processing:
-			if (layers[j].activation == "RElU") {
+			if (layers[j].activation == RElU_const) {
+				cout << RElU_const << endl;
 				for (int k = 0; k < layers[j].neurons.size(); k++) {
 					layers[j].neurons[k].setValue(
 						RElU(layers[j].neurons[k].z)
 					);
 				};
 			}
-			else if (layers[j].activation == "softMax") {
+			else if (layers[j].activation == softMax_const) {
+				cout << softMax_const << endl;
 				vector<Neuron> tmp_neuron_vec = layers[j].neurons;
 				for (int k = 0; k < layers[j].neurons.size(); k++) {
 					layers[j].neurons[k].setValue(
@@ -213,7 +201,9 @@ public:
 				};
 			};
 		};
+	};
 
+	void backwardPropagation(Image& image) {
 		// --- BACK PROPEGATION ---
 		// Iterate through the layers
 		// 1. Find the difference between the network and the actual on the final layer,
@@ -231,7 +221,7 @@ public:
 		// for each neuron 
 		for (int x = 0; x < dz_fin.size(); x++) {
 			// for each weight / bias
-			for (int y = 0; y < layers[fin_index].neurons[x].data_delta.size(); y++) {
+			for (int y = 0; y < layers[fin_index].neurons[x].data.size(); y++) {
 				layers[fin_index].neurons[x].setDeltaWeight(y, layers[fin_index - 1].neurons[y].tmp_value * dz_fin[y]);
 				layers[fin_index].neurons[x].setDeltaBias(y, dz_fin[y]);
 			};
@@ -251,7 +241,8 @@ public:
 				for (int x = 0; x < layers[l].neurons.size(); x++) {
 					tmp = 0;
 					for (int y = 0; y < layers[l + 1].neurons[x].data.size(); y++) {
-						tmp += layers[l + 1].neurons[x].data[y]['w'] * dz_previous[y] * heaviside(layers[l].neurons[x].z);
+						// RElU is assumed for initial layers -> RElU is used
+						tmp += layers[l + 1].neurons[x].data[y].w * dz_previous[y] * heaviside(layers[l].neurons[x].z);
 					}
 					dz[x] = tmp;
 				}
@@ -259,14 +250,17 @@ public:
 
 				// dw[i] = 1/m * dz[i] * X (input layer)
 				// For all neurons on layer
+				// THIS IS BLOWING UP TOO MUCH
 				for (int n = 0; n < layers[l].neurons.size(); n++) {
 					// for all weights on the neuron
 					for (int w = 0; w < layers[l].neurons[n].data.size(); w++) {
-						layers[l].neurons[n].data_delta[w]['w'] = 0;
+						layers[l].neurons[n].data[w].dw = 0;
 						// for all values on the previous layer
+						tmp = 0;
 						for (int v = 0; v < layers[l - 1].neurons.size(); v++) {
-							layers[l].neurons[n].data_delta[w]['w'] += dz[n] * layers[l - 1].neurons[v].tmp_value;
+							tmp += dz[n] * layers[l - 1].neurons[v].tmp_value;
 						};
+						layers[l].neurons[n].setDeltaWeight(w, tmp / 100 );
 					};
 				};
 				// ...
@@ -278,8 +272,8 @@ public:
 				}
 				// update change to biaz
 				for (int b = 0; b < layers[l].neurons.size(); b++) {
-					for (int n = 0; n < layers[l].neurons[b].data_delta.size(); n++) {
-						layers[l].neurons[b].data_delta[n]['b'] = sumz;
+					for (int n = 0; n < layers[l].neurons[b].data.size(); n++) {
+						layers[l].neurons[b].setDeltaBias(n, sumz / 100);
 					};
 				};
 
@@ -289,12 +283,23 @@ public:
 			for (int l = 1; l < layers.size(); l++) {
 				for (int n = 0; n < layers[l].neurons.size(); n++) {
 					for (int w = 0; w < layers[l].neurons[n].data.size(); w++) {
-						layers[l].neurons[n].setWeight(w, layers[l].neurons[n].data[w]['w'] - layers[l].alpha * layers[l].neurons[n].data_delta[w]['w']);
-						layers[l].neurons[n].setBias(w, layers[l].neurons[n].data[w]['b'] - layers[l].alpha * layers[l].neurons[n].data_delta[w]['b']);
+						layers[l].neurons[n].setWeight(w, layers[l].neurons[n].data[w].w - layers[l].alpha * layers[l].neurons[n].data[w].dw);
+						layers[l].neurons[n].setBias(w, layers[l].neurons[n].data[w].b - layers[l].alpha * layers[l].neurons[n].data[w].db);
 					};
 				};
 			};
 		};
+		//cout << "Printing node 1, 0 weights / biases" << endl;
+		
+	}
+
+
+
+	void train(Image& image) {
+		cout << "Training data on: " << endl;
+		image.print();
+		forwardPropagation(image);
+		backwardPropagation(image);
 	};
 
 	void trainVector(vector<Image>& images) {
@@ -302,6 +307,7 @@ public:
 		for (auto image : images) {
 			train(image);
 		}
+		layers[1].neurons[0].printData();
 	}
 
 };

@@ -10,7 +10,7 @@ using namespace std;
 
 const string RElU_const = "RElU";
 const string softMax_const = "softMax";
-const int maxPixles = 255;
+const int maxPixels = 255;
 
 
 
