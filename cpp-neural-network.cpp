@@ -22,7 +22,7 @@ int main()
 	File labelData = File(trainLabelsPath, trainLabelsFile);
 
 	int start_index = 0;
-	int end_index = 3;
+	int end_index = 500;
 
 	vector<Image> training_images = trainingData.getImageVector(start_index, end_index);
 	vector<char> training_labels = labelData.getLabelVector(start_index, end_index);
@@ -43,7 +43,7 @@ int main()
 	nn.printNodeValues(2, 9);
 	nn.trainVector(training_images);
 	//nn.printLayerVals(1);
-	//nn.printLayerVals(2);
+	nn.printLayerVals(2);
 
 	return 1;
 }

@@ -169,7 +169,7 @@ public:
 		cout << "Training data on: " << endl;
 		image.print();
 
-		// FORWARD PROPAGATION
+		// --- FORWARD PROPAGATION ---
 		// Initiate the zeroth layer...
 		for (int i = 0; i < layers[0].neurons.size(); i++) {
 			layers[0].neurons[i].setValue(
@@ -214,7 +214,7 @@ public:
 			};
 		};
 
-		// BACK PROPEGATION
+		// --- BACK PROPEGATION ---
 		// Iterate through the layers
 		// 1. Find the difference between the network and the actual on the final layer,
 		// this will be: dz = A - Y
@@ -241,19 +241,60 @@ public:
 		// working backward from the second last layer
 		vector<float> dz;
 		vector<float> dz_previous;
+		dz_previous = dz_fin;
+		float tmp = 0;
 		if (fin_index - 1 > 0) {
 			// for each remaining layer greater than the zeroth...
 			for (int l = fin_index - 1; l > 0; l--) {
 				// dz[i] = W[i+1] * dz[i+1] * g'(z[i]) // with i being the layer...
 				dz.resize(layers[l].neurons.size());
-				// time 10.21
+				for (int x = 0; x < layers[l].neurons.size(); x++) {
+					tmp = 0;
+					for (int y = 0; y < layers[l + 1].neurons[x].data.size(); y++) {
+						tmp += layers[l + 1].neurons[x].data[y]['w'] * dz_previous[y] * heaviside(layers[l].neurons[x].z);
+					}
+					dz[x] = tmp;
+				}
+				dz_previous = dz;
+
 				// dw[i] = 1/m * dz[i] * X (input layer)
+				// For all neurons on layer
+				for (int n = 0; n < layers[l].neurons.size(); n++) {
+					// for all weights on the neuron
+					for (int w = 0; w < layers[l].neurons[n].data.size(); w++) {
+						layers[l].neurons[n].data_delta[w]['w'] = 0;
+						// for all values on the previous layer
+						for (int v = 0; v < layers[l - 1].neurons.size(); v++) {
+							layers[l].neurons[n].data_delta[w]['w'] += dz[n] * layers[l - 1].neurons[v].tmp_value;
+						};
+					};
+				};
 				// ...
 				// db[i] = 1/m 8 sum(dz[i])
-				// ...
-			}
-		}
+				// calculate dz
+				float sumz = 0;
+				for (int z = 0; z < dz.size(); z++) {
+					sumz += dz[z];
+				}
+				// update change to biaz
+				for (int b = 0; b < layers[l].neurons.size(); b++) {
+					for (int n = 0; n < layers[l].neurons[b].data_delta.size(); n++) {
+						layers[l].neurons[b].data_delta[n]['b'] = sumz;
+					};
+				};
 
+			};
+
+			// 4. Adjust the weights and biases of all layers apart from input / zeroth
+			for (int l = 1; l < layers.size(); l++) {
+				for (int n = 0; n < layers[l].neurons.size(); n++) {
+					for (int w = 0; w < layers[l].neurons[n].data.size(); w++) {
+						layers[l].neurons[n].setWeight(w, layers[l].neurons[n].data[w]['w'] - layers[l].alpha * layers[l].neurons[n].data_delta[w]['w']);
+						layers[l].neurons[n].setBias(w, layers[l].neurons[n].data[w]['b'] - layers[l].alpha * layers[l].neurons[n].data_delta[w]['b']);
+					};
+				};
+			};
+		};
 	};
 
 	void trainVector(vector<Image>& images) {
