@@ -22,7 +22,8 @@ int main()
 	File labelData = File(trainLabelsPath, trainLabelsFile);
 
 	int start_index = 0;
-	int end_index = 20;
+	int end_index = 64;
+	int batch_size = 16;
 
 	vector<Image> training_images = trainingData.getImageVector(start_index, end_index);
 	vector<char> training_labels = labelData.getLabelVector(start_index, end_index);
@@ -34,15 +35,23 @@ int main()
 	}
 	
 	// create the neural network
-	NeuralNetwork nn = NeuralNetwork({ 
-		trainingData.image_size,       // layer zero
-		10,							   // layer one
-		final_layer_count              // layer two (final)
-	});
+	NeuralNetwork nn = NeuralNetwork(
+		{
+			trainingData.image_size,       // layer zero
+			10,							   // layer one
+			final_layer_count              // final layer (layer two)
+		},    
+		sigmoid_const                      // activation to use
+	);
 	
-	nn.trainVector(training_images);
-	//nn.printLayerVals(1);
+	// train the neural network
+	nn.trainVector(
+		training_images,
+		batch_size
+	);
+	nn.printLayerVals(1);
 	nn.printLayerVals(2);
+	nn.printZVals(2);
 
 	return 1;
 }

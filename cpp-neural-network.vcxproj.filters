@@ -18,9 +18,6 @@
     <ClCompile Include="cpp-neural-network.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="globals.cpp">
-      <Filter>Header Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="globalFunctions.h">

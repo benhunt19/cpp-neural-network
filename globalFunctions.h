@@ -9,6 +9,7 @@ using namespace std;
 // ----- GLOBAL CONSTS ------
 
 const string RElU_const = "RElU";
+const string sigmoid_const = "sigmoid";
 const string softMax_const = "softMax";
 const int maxPixels = 255;
 
@@ -46,4 +47,17 @@ float softMax(vector<N>& vec, int index) {
 		sum += exp(vec[i].z);
 	}
 	return exp(vec[index].z) / sum;
-}
+};
+
+// 3 Sigmoid
+template <typename T>
+T sigmoid(T x) {
+	return 1 / (1 + exp(-x));
+};
+
+// 3.b Sigmoid_deriv
+template <typename T>
+T sigmoid_deriv(T x) {
+	return sigmoid(x) * (1 - sigmoid(x));
+};
+

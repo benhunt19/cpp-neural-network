@@ -128,7 +128,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="cpp-neural-network.cpp" />
-    <ClCompile Include="globals.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="fileClasses.h" />
