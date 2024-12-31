@@ -180,6 +180,19 @@ public:
 		};
 	};
 
+	int getOutputResults() {
+		int fin_index = layers.size() - 1;
+		int layer_size = layers[fin_index].neurons.size();
+		vector<float> activations(layer_size);
+		for (int i = 0; i < layer_size; i++) {
+			activations[i] = layers[fin_index].neurons[i].activation;
+		};
+		vector<float>::iterator max = max_element(activations.begin(), activations.end());
+		int max_index = distance(activations.begin(), max);
+		cout << max_index << "  %" << *max * 100 << endl;
+		return *max;
+	}
+
 
 
 	void forwardPropagation(Image& image) {
@@ -266,7 +279,7 @@ public:
 		for (int l = fin_index - 1; l > 0; l--) {
 			dz.resize(layers[l].neurons.size(), 0.0f);
 
-			// Compute dz for current layer
+			// Compute dz for current layer not including input
 			for (int x = 0; x < layers[l].neurons.size(); x++) {
 				float tmp = 0.0f;
 				for (int y = 0; y < layers[l + 1].neurons.size(); y++) {
@@ -296,7 +309,6 @@ public:
 		}
 	}
 
-
 	void paramAdjust() {
 		// Adjust the weights and biases of all layers apart from input / zeroth
 		// For each layer
@@ -313,14 +325,14 @@ public:
 	}
 
 	void train(Image& image) {
-		image.print();
+		//image.print();
 		forwardPropagation(image);
-		printLayerVals(2);
+		//printLayerVals(2);
 		backwardPropagation(image);
 	};
 
 	void trainVector(vector<Image>& images, int batch_size) {
-		cout << "Training on " << images.size() << " images in mini-batches of " << batch_size << endl;
+		cout << "Training on " << images.size() << " images in batches of " << batch_size << endl;
 
 		// Divide dataset into mini-batches
 		int num_batches = images.size() / batch_size;
@@ -330,10 +342,8 @@ public:
 
 			resetGradients();
 
-			// Process each image in the mini-batch
+			// Process each image in the batch
 			for (auto& image : mini_batch) {
-				//cout << (int)image.label << endl;
-				//image.print();
 				train(image);
 			}
 
@@ -347,6 +357,13 @@ public:
 
 	void testImage(Image& image) {
 		forwardPropagation(image);
-		printLayerVals(layers.size() - 1);
+		image.print();
+		getOutputResults();
 	};
+
+	void testVector(vector<Image>& images) {
+		for (auto& image : images) {
+			testImage(image);
+		}
+	}
 };

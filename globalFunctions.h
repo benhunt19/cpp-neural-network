@@ -33,7 +33,7 @@ T RElU(T x) {
 	return max(T(0), x);
 };
 
-// 1b. RElU prime (heaviside step)
+// 1b. RElU prime or deriv (heaviside step)
 template <typename T>
 T heaviside(T x) {
 	return T(x) >= 0 ? 1 : 0;
