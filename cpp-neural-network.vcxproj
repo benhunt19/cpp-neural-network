@@ -128,10 +128,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="cpp-neural-network.cpp" />
-    <ClCompile Include="globals.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="header.h" />
+    <ClInclude Include="fileClasses.h" />
+    <ClInclude Include="globalFunctions.h" />
+    <ClInclude Include="networkClasses.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
