@@ -22,7 +22,7 @@ int main()
 	File labelData = File(trainLabelsPath, trainLabelsFile);
 
 	int start_index = 0;
-	int end_index = 64;
+	int end_index = 3000;
 	int batch_size = 16;
 
 	vector<Image> training_images = trainingData.getImageVector(start_index, end_index);
@@ -41,7 +41,7 @@ int main()
 			10,							   // layer one
 			final_layer_count              // final layer (layer two)
 		},    
-		sigmoid_const                      // activation to use
+		RElU_const                      // activation to use
 	);
 	
 	// train the neural network

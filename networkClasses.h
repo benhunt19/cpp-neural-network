@@ -147,7 +147,7 @@ public:
 	void printLayerVals(int layer_index) {
 		cout << "Current node values for layer: " << layer_index << endl;
 		for (int i = 0; i < layers[layer_index].neurons.size(); i++) {
-			cout << layers[layer_index].neurons[i].activation << endl;
+			cout << i << ": " << layers[layer_index].neurons[i].activation << endl;
 		}
 	};
 
@@ -313,8 +313,9 @@ public:
 	}
 
 	void train(Image& image) {
-		//image.print();
+		image.print();
 		forwardPropagation(image);
+		printLayerVals(2);
 		backwardPropagation(image);
 	};
 
@@ -331,8 +332,8 @@ public:
 
 			// Process each image in the mini-batch
 			for (auto& image : mini_batch) {
-				cout << (int)image.label << endl;
-				image.print();
+				//cout << (int)image.label << endl;
+				//image.print();
 				train(image);
 			}
 
