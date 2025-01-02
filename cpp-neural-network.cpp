@@ -8,7 +8,7 @@
 
 using namespace std;
 
-/*GLOBALS*/
+/*GLOBAL FILE LOCATIONS*/
 // Images
 const string trainImagesPath = "C:/Users/benhu/PycharmProjects/Data Sets/mnist-dataset/versions/1/train-images-idx3-ubyte";
 const string trainImagesFile = "/train-images-idx3-ubyte";
@@ -25,15 +25,16 @@ int main()
 	File trainingImageData = File(trainImagesPath, trainImagesFile);
 	File trainingLabelData = File(trainLabelsPath, trainLabelsFile);
 
-	int start_index = 0;
-	int end_index = 60000;
-	int batch_size = 16;
+	int start_index = 0;   // image index to start on
+	int end_index = 60000; // image index to finish on
+	int batch_size = 16;   // batch size for weight / bias adjustment
+	int epoch = 2;         // epoch number, how many times to review dataset
 
 	vector<Image> training_images = trainingImageData.getImageVector(start_index, end_index);
 	vector<char> training_labels = trainingLabelData.getLabelVector(start_index, end_index);
 	int final_layer_count = 10; // labels are 0, 1, 2, ... , 9 
 
-	// zip together the images and their corresponding labels
+	// zip together the training images and their corresponding labels
 	for (int i = start_index; i < end_index; i++) {
 		training_images[i].setLabel(training_labels[i]);
 	}
@@ -42,8 +43,9 @@ int main()
 	NeuralNetwork nn = NeuralNetwork(
 		{
 			trainingImageData.image_size,  // input (layer zero)
-			10,							   // layer one
-			final_layer_count              // final layer (layer two)
+			80,							   // layer one
+			20,							   // layer two
+			final_layer_count              // final layer (layer three)
 		},    
 		RElU_const                         // activation to use
 	);
@@ -51,26 +53,29 @@ int main()
 	// train the neural network
 	nn.trainVector(
 		training_images,
-		batch_size
+		batch_size,
+		epoch
 	);
 
 	File testImageData = File(testImagesPath, testImagesFile);
 	File testLabelData = File(testLabelsPath, testLabelsFile);
 
 	int start_index_test = 0;
-	int end_index_test = 256;
+	int end_index_test = 1000;
 
 	vector<Image> test_images = testImageData.getImageVector(start_index_test, end_index_test);
 	vector<char> test_labels = testLabelData.getLabelVector(start_index_test, end_index_test);
 
-	// zip together the images and their corresponding labels
+	// zip together the test images and their corresponding labels
 	for (int i = start_index_test; i < end_index_test; i++) {
 		test_images[i].setLabel(test_labels[i]);
 	}
 
-	cout << "~~~~~~~~~~ TESTING ~~~~~~~~~~" << endl;
+	cout << "Testing network on " << test_images.size() <<  " images" << endl;
 
 	nn.testVector(test_images);
 
-	return 1;
+	nn.toJson();
+
+	return 0;
 }

@@ -39,6 +39,12 @@ public:
 	void setLabel(char label_in) {
 		label = label_in;
 	};
+
+	void dispDataAsArray() {
+		for (int x = 0; x < image_data.size(); x++) {
+			cout << (int)image_data[x] << ",";
+		}
+	}
 };
 
 
@@ -108,7 +114,7 @@ public:
 				cout << "File Type: " << type << endl;
 				file.read((char*)&num_labels, sizeof(num_labels));
 				num_labels = swapEndian(num_labels);
-				cout << "Num labels: " << num_labels << endl;
+				cout << "Number of labels: " << num_labels << endl;
 			}
 			else {
 				cout << "File is corrupted" << endl;

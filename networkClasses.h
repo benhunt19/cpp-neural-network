@@ -3,9 +3,11 @@
 #include <iostream>
 #include <vector>
 #include <fstream>
-#include <map>
 #include <assert.h>
+#include "json.hpp"
+
 using namespace std;
+using json = nlohmann::json;
 
 class Neuron {
 	// the weights and biases between a node on 
@@ -30,18 +32,14 @@ public:
 		float w;
 		float dw;
 	};
-	vector<connection> data;
-	int layer = 0;
-	int index = 0;
-	float activation = 0.0f;	// used o store activation through each iteration
+	vector<connection> data;    // array of weights and weight deltas for back prop
+	float value = 0.0f;	// used o store activation through each iteration
 	float z = 0.0f;				// used in forward and back propegation
 	float b = 0.0f;				// bias term
 	float db = 0.0f;			// change in bias term
 
 
 	Neuron(vector<int>& shape, int& layer_index, int& node_index) {
-		layer = layer_index;
-		index = node_index;
 		if (layer_index != 0 && layer_index < shape.size()) {
 			// resize data and data_delta
 			b = uniformRandom(-0.5, 0.5);
@@ -54,8 +52,8 @@ public:
 		};
 	};
 
-	void setValue(float value) {
-		activation = value;
+	void setValue(float value_in) {
+		value = value_in;
 	};
 	
 	void setZ(float value) {
@@ -69,7 +67,6 @@ public:
 			cout << data[i].w << " " << data[i].dw << endl;
 		};
 	};
-
 
 	void setWeight(int index, float value) {
 		data[index].w = value;
@@ -87,11 +84,6 @@ public:
 		db = value;
 	};
 
-
-
-	void calculateValue() {
-
-	}
 
 };
 
@@ -125,7 +117,8 @@ public:
 		for (int i = 0; i < shape.size(); i++) {
 			if (i < shape.size() - 1) {
 				// determine activation function for hidden layers
-				layers.push_back(NetworkLayer(shape, i, activation, alpha));
+				// input layer (zeroth) doesn't need an activation
+				layers.push_back(NetworkLayer(shape, i, i > 0 ? activation : "", alpha));
 			}
 			else {
 				// use softmax for the final / output layer,
@@ -136,21 +129,15 @@ public:
 		};
 	};
 
-	void printNetwork() {
-		for (auto layer : layers) {
-			for (auto neuron : layer.neurons) {
-				cout << "layer: " << neuron.layer << " ,index: " << neuron.index << endl;
-			};
-		};
-	};
-
+	// print values of each neuron on a certain layer
 	void printLayerVals(int layer_index) {
 		cout << "Current node values for layer: " << layer_index << endl;
 		for (int i = 0; i < layers[layer_index].neurons.size(); i++) {
-			cout << i << ": " << layers[layer_index].neurons[i].activation << endl;
+			cout << i << ": " << layers[layer_index].neurons[i].value << endl;
 		}
 	};
 
+	// Print current Z value for all neurons on a certain layer
 	void printZVals(int layer_index) {
 		cout << "Current Z node values for layer: " << layer_index << endl;
 		for (int i = 0; i < layers[layer_index].neurons.size(); i++) {
@@ -158,6 +145,7 @@ public:
 		}
 	};
 
+	// Reset current gradients (dw) for all neurons
 	void resetGradients() {
 		for (int l = 1; l < layers.size(); l++) {
 			for (int n = 0; n < layers[l].neurons.size(); n++) {
@@ -169,6 +157,7 @@ public:
 		};
 	};
 
+	// Divide current gradients by batch size for adjustment
 	void averageGradients(int batch_size) {
 		for (int l = 1; l < layers.size(); ++l) {
 			for (auto& neuron : layers[l].neurons) {
@@ -180,20 +169,19 @@ public:
 		};
 	};
 
+	// Get the networks suggested output for once an input has been run
 	int getOutputResults() {
 		int fin_index = layers.size() - 1;
 		int layer_size = layers[fin_index].neurons.size();
-		vector<float> activations(layer_size);
+		vector<float> values(layer_size);
 		for (int i = 0; i < layer_size; i++) {
-			activations[i] = layers[fin_index].neurons[i].activation;
+			values[i] = layers[fin_index].neurons[i].value;
 		};
-		vector<float>::iterator max = max_element(activations.begin(), activations.end());
-		int max_index = distance(activations.begin(), max);
-		cout << max_index << "  %" << *max * 100 << endl;
-		return *max;
+		vector<float>::iterator max = max_element(values.begin(), values.end());
+		int max_index = distance(values.begin(), max);
+		//cout << max_index << "  %" << *max * 100 << endl;
+		return max_index;
 	}
-
-
 
 	void forwardPropagation(Image& image) {
 
@@ -215,7 +203,7 @@ public:
 				z = 0;
 				// Z = W.*A + b
 				for (int l = 0; l < layers[j].neurons[k].data.size(); l++) {
-					z += layers[j].neurons[k].data[l].w * layers[j - 1].neurons[l].activation;
+					z += layers[j].neurons[k].data[l].w * layers[j - 1].neurons[l].value;
 				};
 				z += layers[j].neurons[k].b; // add bias component
 				layers[j].neurons[k].setZ(z);
@@ -261,15 +249,14 @@ public:
 		// 1. Compute dz for the final layer: dz = A - Y
 		vector<float> dz_fin(layers[fin_index].neurons.size());
 		for (int i = 0; i < layers[fin_index].neurons.size(); i++) {
-			dz_fin[i] = layers[fin_index].neurons[i].activation - ( (int)image.label == i ? 1.0f : 0.0f);
+			dz_fin[i] = layers[fin_index].neurons[i].value - ( (int)image.label == i ? 1.0f : 0.0f);
 		}
 
 		// Update gradients for the final layer
 		for (int x = 0; x < dz_fin.size(); x++) {
 			layers[fin_index].neurons[x].db += dz_fin[x];
 			for (int y = 0; y < layers[fin_index].neurons[x].data.size(); y++) {
-				layers[fin_index].neurons[x].data[y].dw +=
-					dz_fin[x] * layers[fin_index - 1].neurons[y].activation;
+				layers[fin_index].neurons[x].data[y].dw += dz_fin[x] * layers[fin_index - 1].neurons[y].value;
 			}
 		}
 
@@ -300,7 +287,7 @@ public:
 				layers[l].neurons[n].db += dz[n];
 
 				for (int w = 0; w < layers[l].neurons[n].data.size(); w++) {
-					layers[l].neurons[n].data[w].dw += dz[n] * layers[l - 1].neurons[w].activation;
+					layers[l].neurons[n].data[w].dw += dz[n] * layers[l - 1].neurons[w].value;
 				}
 			}
 
@@ -309,6 +296,7 @@ public:
 		}
 	}
 
+	// adjust the weights and biases based on gradients and learning rate
 	void paramAdjust() {
 		// Adjust the weights and biases of all layers apart from input / zeroth
 		// For each layer
@@ -324,46 +312,97 @@ public:
 		};
 	}
 
+	// run foward and back prop on an image
 	void train(Image& image) {
-		//image.print();
 		forwardPropagation(image);
-		//printLayerVals(2);
 		backwardPropagation(image);
 	};
 
-	void trainVector(vector<Image>& images, int batch_size) {
+	// Train network on images via batch
+	void trainVector(vector<Image>& images, int batch_size, int epoch) {
 		cout << "Training on " << images.size() << " images in batches of " << batch_size << endl;
 
-		// Divide dataset into mini-batches
-		int num_batches = images.size() / batch_size;
-		for (int batch = 0; batch < num_batches; batch++) {
-			// Create mini-batch
-			vector<Image> mini_batch(images.begin() + batch * batch_size, images.begin() + (batch + 1) * batch_size);
+		// repeat testing
+		for (int x = 0; x < epoch; x++) {
+			// Divide dataset into mini-batches
+			int num_batches = images.size() / batch_size;
+			for (int batch = 0; batch < num_batches; batch++) {
+				// Create mini-batch
+				vector<Image> mini_batch(images.begin() + batch * batch_size, images.begin() + (batch + 1) * batch_size);
 
-			resetGradients();
+				//reset the gradients in the new batch
+				resetGradients();
 
-			// Process each image in the batch
-			for (auto& image : mini_batch) {
-				train(image);
+				// Process each image in the batch
+				for (auto& image : mini_batch) {
+					train(image);
+				}
+
+				// Average gradients over the batch
+				averageGradients(mini_batch.size());
+
+				// Update parameters with averaged deltas
+				paramAdjust();
 			}
-
-			// Average gradients over the batch
-			averageGradients(mini_batch.size());
-			// Update parameters with averaged deltas
-
-			paramAdjust();
 		}
+
 	};
 
-	void testImage(Image& image) {
+	// Test image through the current neural network
+	int testImage(Image& image) {
 		forwardPropagation(image);
-		image.print();
-		getOutputResults();
+		return getOutputResults();
 	};
 
+	// Test network on array of images and output accuracy
 	void testVector(vector<Image>& images) {
+		int counter = 0;
+		int correct = 0;
 		for (auto& image : images) {
-			testImage(image);
+			counter++;
+			if (image.label == testImage(image)) {
+				correct++;
+			};
+		};
+		float accuracy = (float)correct * 100 / (float)counter;
+		cout << "Accuracy: " << accuracy << "%" << endl;
+	};
+
+	// Save the network to tensorflow compatable JSON
+	void toJson() {
+		// Create a JSON object
+		json jsonObject;
+
+		jsonObject["name"] = "C++ Neural Network";
+		// for each layer
+		jsonObject["layers"] = {};
+		for (int l = 0; l < layers.size(); l++) {
+			jsonObject["layers"][l] = {
+				{ "activation", layers[l].activation },
+				{"neurons", {}}
+			};
+			// for each neuron
+			for (int n = 0; n < layers[l].neurons.size(); n++) {
+				jsonObject["layers"][l]["neurons"][n] = {
+					{ "bias", layers[l].neurons[n].b },
+					{ "weights",{}}
+				};
+				vector<float> weights(layers[l].neurons[n].data.size());
+				// for each weight
+				for (int w = 0; w < layers[l].neurons[n].data.size(); w++) {
+					weights[w] = layers[l].neurons[n].data[w].w;
+				}
+				jsonObject["layers"][l]["neurons"][n]["weights"] = weights;
+			}
+		};
+		// Write JSON to a file
+		ofstream outFile("./Saved Networks/model_" + getCurrentTimestamp() + ".json");
+		if (outFile.is_open()) {
+			outFile << jsonObject.dump(4); // Pretty-print with 4 spaces
+			outFile.close();
+		}
+		else {
+			cerr << "Unable to open file for writing!" << std::endl;
 		}
 	}
 };
