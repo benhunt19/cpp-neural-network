@@ -1,6 +1,8 @@
 #pragma once
 #include <ctime>
 #include <random>
+#include <chrono>
+#include <string>
 //#include "globalClasses.h"
 
 using namespace std;
@@ -24,7 +26,6 @@ float uniformRandom(float min, float max) {
 	uniform_real_distribution<> dis(min, max);
 	return dis(gen);
 }
-
 
 // ACTIVATION FUNCTIONS
 // 1. RElU (ramp)
@@ -61,3 +62,16 @@ T sigmoid_deriv(T x) {
 	return sigmoid(x) * (1 - sigmoid(x));
 };
 
+
+// MISC FUNCTIONS
+#include <chrono>
+#include <ctime>
+#include <sstream>
+#include <iomanip>
+
+string getCurrentTimestamp() {
+	// Get the current time as a time_point
+	auto now = chrono::system_clock::now();
+	auto duration = chrono::duration_cast<chrono::seconds>(now.time_since_epoch());
+	return to_string(duration.count());
+}

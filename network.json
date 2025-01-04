@@ -1,0 +1,14 @@
+{
+    "address": {
+        "city": "New York",
+        "zip": "10001"
+    },
+    "age": 25,
+    "is_student": true,
+    "name": "Alice",
+    "skills": [
+        "C++",
+        "Python",
+        "JavaScript"
+    ]
+}

@@ -7,8 +7,7 @@
 using namespace std;
 
 
-
-// ---- GLOBAL CLASSES -----
+// ---- GLOBAL FILE CLASSES -----
 
 
 class Image {
@@ -19,6 +18,7 @@ public:
 	vector<uint8_t> image_data = {};
 	char label = ' ';
 
+	// Innit image instance
 	Image(vector<uint8_t> image_data_in, int32_t num_rows_in, int32_t num_cols_in, int32_t image_size_in) {
 		image_data = image_data_in;
 		image_size = image_size_in;
@@ -26,6 +26,15 @@ public:
 		num_cols = num_cols_in;
 	};
 
+	// Test image from front end
+	Image(vector<uint8_t> image_data_in) {
+		// for testing
+		image_data = image_data_in;
+		num_rows = 28;
+		num_cols = 28;
+	}
+
+	// Print image to command line
 	void print() {
 		char tmp = ' ';
 		for (int x = 0; x < image_data.size(); x++) {
@@ -36,9 +45,17 @@ public:
 		cout << endl;
 	};
 
+	// Set label for training model
 	void setLabel(char label_in) {
 		label = label_in;
 	};
+
+	// Output pixel data
+	void dispDataAsArray() {
+		for (int x = 0; x < image_data.size(); x++) {
+			cout << (int)image_data[x] << ",";
+		}
+	}
 };
 
 
@@ -83,32 +100,35 @@ public:
 			
 			// Magic number determines the content of the file
 			if (magic_number == 2051) {
+
 				type = "images";
-				cout << "File Type: " << type << endl;
+
 				// Second 4 bytes are the number of images
 				file.read(reinterpret_cast<char*>(&num_images), sizeof(num_images));
 				num_images = swapEndian(num_images);
-				cout << "Number of Images: " << num_images << endl;
 
 				// Third 4 bytes are the number of rows
 				file.read(reinterpret_cast<char*>(&num_rows), sizeof(num_rows));
 				num_rows = swapEndian(num_rows);
-				cout << "Number of Rows: " << num_rows << endl;
 
 				// Fourth 4 bytes are the number of columns
 				file.read(reinterpret_cast<char*>(&num_cols), sizeof(num_cols));
 				num_cols = swapEndian(num_cols);
-				cout << "Number of Columns: " << num_cols << endl;
+
+				cout << "File Type: " << type;
+				cout << ", Images: " << num_images;
+				cout << ", Rows: " << num_rows;
+				cout << ", Cols: " << num_cols << endl;
 
 				// Calculate image size
 				image_size = num_rows * num_cols;
 			}
 			else if (magic_number == 2049)  {
 				type = "labels";
-				cout << "File Type: " << type << endl;
 				file.read((char*)&num_labels, sizeof(num_labels));
 				num_labels = swapEndian(num_labels);
-				cout << "Num labels: " << num_labels << endl;
+				cout << "File Type: " << type;
+				cout << ", Labels: " << num_labels << endl;
 			}
 			else {
 				cout << "File is corrupted" << endl;
@@ -118,6 +138,7 @@ public:
 		
 	}
 
+	// Return image at an index in dataset
 	Image getImage(int image_index) {
 		assert(type == "images");
 		vector<uint8_t> image_data(image_size);
@@ -130,13 +151,14 @@ public:
 		return Image(image_data, num_rows, num_cols, image_size); // review this;
 	};
 
-
+	// Print image at an index
 	void printImageAtIndex(int image_index) {
 		assert(type == "images");
 		Image imageToPrint = getImage(image_index);
 		imageToPrint.print();
 	};
 
+	// Efficiently get images from data from one index to another
 	vector<Image> getImageVector(int start_index, int end_index) {
 		assert(type == "images");
 		vector<Image> return_vec = {};
@@ -157,6 +179,7 @@ public:
 
 	};
 
+	// Get label at index from label file
 	char getLabelAtIndex(int label_index) {
 		assert(type == "labels");
 		char label;
@@ -170,6 +193,7 @@ public:
 		return label;
 	};
 
+	// Efficiently get labels from label file and return vector
 	vector<char> getLabelVector(int start_index, int end_index) {
 		assert(type == "labels");
 		vector<char> return_vec;
