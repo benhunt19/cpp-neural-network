@@ -113,6 +113,7 @@ public:
 	vector<NetworkLayer> layers;
 	// to initialise the NN
 	const float alpha = 0.2; // global learning rate
+	float accuracy = 0;      // to be set once trained
 	NeuralNetwork(vector<int> shape, string activation) {
 		for (int i = 0; i < shape.size(); i++) {
 			if (i < shape.size() - 1) {
@@ -364,9 +365,27 @@ public:
 				correct++;
 			};
 		};
-		float accuracy = (float)correct * 100 / (float)counter;
+		accuracy = (float)correct * 100 / (float)counter;
 		cout << "Accuracy: " << accuracy << "%" << endl;
 	};
+
+	// Name network based on weights and biases and accuacy
+	string nameNetwork() {
+		string retString = "";
+		for (int l = 0; l < layers.size() ; l++){
+			retString += to_string(layers[l].neurons.size());
+			if (l += layers.size() - 1) {
+				retString += "-";
+			}
+			
+		}
+		if (accuracy) {
+			retString += "_";
+			retString += to_string((int)accuracy);
+			retString += "pcnt";
+		}
+		return retString;
+	}
 
 	// Save the network to tensorflow compatable JSON
 	void toJson() {
@@ -374,6 +393,7 @@ public:
 		json jsonObject;
 
 		jsonObject["name"] = "C++ Neural Network";
+		jsonObject["accuracy"] = accuracy;
 		// for each layer
 		jsonObject["layers"] = {};
 		for (int l = 0; l < layers.size(); l++) {
@@ -396,7 +416,7 @@ public:
 			}
 		};
 		// Write JSON to a file
-		ofstream outFile("./Saved Networks/model_" + getCurrentTimestamp() + ".json");
+		ofstream outFile("./Saved Networks/model_" + nameNetwork() + getCurrentTimestamp() + ".json");
 		if (outFile.is_open()) {
 			outFile << jsonObject.dump(4); // Pretty-print with 4 spaces
 			outFile.close();
