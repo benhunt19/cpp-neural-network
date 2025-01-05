@@ -112,9 +112,10 @@ class NeuralNetwork {
 public:
 	vector<NetworkLayer> layers;
 	// to initialise the NN
-	const float alpha = 0.2; // global learning rate
+	float alpha = 0.2;       // global learning rate
 	float accuracy = 0;      // to be set once trained
-	NeuralNetwork(vector<int> shape, string activation) {
+	NeuralNetwork(vector<int> shape, string activation, float alpha_in) {
+		alpha = alpha_in;
 		for (int i = 0; i < shape.size(); i++) {
 			if (i < shape.size() - 1) {
 				// determine activation function for hidden layers
@@ -325,6 +326,7 @@ public:
 
 		// repeat testing
 		for (int x = 0; x < epoch; x++) {
+			cout << "Epoch: " << x + 1 << "/" << epoch << endl;
 			// Divide dataset into mini-batches
 			int num_batches = images.size() / batch_size;
 			for (int batch = 0; batch < num_batches; batch++) {

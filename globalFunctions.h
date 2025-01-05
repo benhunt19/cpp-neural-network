@@ -3,6 +3,7 @@
 #include <random>
 #include <chrono>
 #include <string>
+#include <vector>
 //#include "globalClasses.h"
 
 using namespace std;
@@ -64,10 +65,6 @@ T sigmoid_deriv(T x) {
 
 
 // MISC FUNCTIONS
-#include <chrono>
-#include <ctime>
-#include <sstream>
-#include <iomanip>
 
 string getCurrentTimestamp() {
 	// Get the current time as a time_point
