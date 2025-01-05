@@ -28,7 +28,8 @@ int main()
     int start_index = 0;   // image index to start on
     int end_index = 60000; // image index to finish on
     int batch_size = 16;   // batch size for weight / bias adjustment
-    int epoch = 5;         // epoch number, how many times to review dataset
+    int epoch = 3;         // epoch number, how many times to review dataset
+	float alpha = 0.1;     // learning rate
 
     vector<Image> training_images = trainingImageData.getImageVector(start_index, end_index);
     vector<char> training_labels = trainingLabelData.getLabelVector(start_index, end_index);
@@ -43,11 +44,12 @@ int main()
     NeuralNetwork nn = NeuralNetwork(
         {
             trainingImageData.image_size,  // input (layer zero)
-            20,							   // layer two
-            10,							   // layer two
+            80,						       // layer one
+            20,						       // layer two
             final_layer_count              // final layer (layer three)
         },
-        RElU_const                         // activation to use
+        RElU_const,                        // activation to use
+		alpha							   // learning rate
     );
 
     // train the neural network
