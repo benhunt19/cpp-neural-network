@@ -1,4 +1,4 @@
-// cpp-neural-network.cpp : This file contains the 'main' function. Program execution begins and ends there.
+// cpp-neural-network.cpp : This file contains the 'main' function.
 
 #include <iostream>
 #include <fstream>
@@ -36,7 +36,8 @@ int main()
     int final_layer_count = 10; // labels are 0, 1, 2, ... , 9 
 
     // zip together the training images and their corresponding labels
-    for (int i = start_index; i < end_index; i++) {
+    for (int i = start_index; i < end_index; i++)
+    {
         training_images[i].setLabel(training_labels[i]);
     }
 
@@ -70,7 +71,8 @@ int main()
     vector<char> test_labels = testLabelData.getLabelVector(start_index_test, end_index_test);
 
     // zip together the test images and their corresponding labels
-    for (int i = start_index_test; i < end_index_test; i++) {
+    for (int i = start_index_test; i < end_index_test; i++)
+    {
         test_images[i].setLabel(test_labels[i]);
     }
 
