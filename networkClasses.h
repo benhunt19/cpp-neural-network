@@ -214,9 +214,8 @@ class NeuralNetwork {
 			};
 			vector<float>::iterator max = max_element(values.begin(), values.end());
 			int max_index = distance(values.begin(), max);
-			//cout << max_index << "  %" << *max * 100 << endl;
 			return max_index;
-		}
+		};
 
 		void forwardPropagation(Image& image)
 		{
@@ -256,7 +255,6 @@ class NeuralNetwork {
 				// Activation function processing:
 				if (layers[j].activation == RElU_const)
 				{
-					//cout << RElU_const << endl;
 					for (int k = 0; k < layers[j].neurons.size(); k++)
 					{
 						layers[j].neurons[k].setValue(
@@ -266,7 +264,6 @@ class NeuralNetwork {
 				}
 				else if (layers[j].activation == softMax_const)
 				{
-					//cout << softMax_const << endl;
 					vector<Neuron> tmp_neuron_vec = layers[j].neurons;
 					for (int k = 0; k < layers[j].neurons.size(); k++)
 					{
@@ -277,7 +274,6 @@ class NeuralNetwork {
 				}
 				else if (layers[j].activation == sigmoid_const)
 				{
-					//cout << sigmoid_const << endl;
 					for (int k = 0; k < layers[j].neurons.size(); k++)
 					{
 						layers[j].neurons[k].setValue(
@@ -443,14 +439,14 @@ class NeuralNetwork {
 		string nameNetwork()
 		{
 			string retString = "";
-			for (int l = 0; l < layers.size() ; l++)
+			for (int l = 0; l < layers.size(); l++)
 			{
 				retString += to_string(layers[l].neurons.size());
 				if (l += layers.size() - 1)
 				{
 					retString += "-";
 				}
-			
+
 			}
 			if (accuracy)
 			{
@@ -459,7 +455,7 @@ class NeuralNetwork {
 				retString += "pcnt";
 			}
 			return retString;
-		}
+		};
 
 		// Save the network to tensorflow compatable JSON
 		void toJson()
@@ -504,5 +500,5 @@ class NeuralNetwork {
 			{
 				cerr << "Unable to open file for writing!" << std::endl;
 			}
-		}
+		};
 };

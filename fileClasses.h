@@ -35,7 +35,7 @@ class Image {
 			image_data = image_data_in;
 			num_rows = 28;
 			num_cols = 28;
-		}
+		};
 
 		// Print image to command line
 		void print()
@@ -63,7 +63,7 @@ class Image {
 			{
 				cout << (int)image_data[x] << ",";
 			}
-		}
+		};
 };
 
 
