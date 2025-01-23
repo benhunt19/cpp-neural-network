@@ -301,7 +301,43 @@ class NeuralNetwork {
 			};
 		};
 
-		// run foward and back prop on an image
+		// Name network based on weights and biases and accuacy
+		string nameNetwork() {
+			string retString = "";
+			for (int l = 0; l < layers.size(); l++) {
+				retString += to_string(layers[l].neurons.size());
+				if (l < layers.size() - 1) {
+					retString += "-";
+				};
+			};
+			if (accuracy) {
+				retString += "_";
+				retString += to_string((int)accuracy);
+				retString += "pcnt";
+			};
+			return retString;
+		};
+
+		// Get activations as a string for user output
+		string nameActivations() {
+			string retString = "";
+			for (int l = 0; l < layers.size(); l++) {
+				retString += (layers[l].activation != "") ? layers[l].activation : "Input (none)";
+				retString += ((l < layers.size() - 1) ? ", " : "");
+			};
+			return retString;
+		};
+
+		void printHyperParams(int epoch) {
+			cout << endl;
+			cout << "Network Dimensions: " << nameNetwork() << endl;
+			cout << "Activations: " << nameActivations() << endl;
+			cout << "Learning Rate (alpha): " << alpha << endl;
+			cout << "Epoch: " << epoch << endl;
+			cout << endl;
+		};
+
+		// Run foward and back prop on an image
 		void train(Image& image) {
 			forwardPropagation(image);
 			backwardPropagation(image);
@@ -309,9 +345,12 @@ class NeuralNetwork {
 
 		// Train network on images via batch
 		void trainVector(vector<Image>& images, int batch_size, int epoch) {
-			cout << "Training on " << images.size() << " images in batches of " << batch_size << endl;
+
+			// Print network hyperparams to the user
+			printHyperParams(epoch);
 
 			// repeat testing
+			cout << "Training on " << images.size() << " images in batches of " << batch_size << endl;
 			for (int x = 0; x < epoch; x++) {
 				cout << "Epoch: " << x + 1 << "/" << epoch << endl;
 				// Divide dataset into mini-batches
@@ -333,8 +372,8 @@ class NeuralNetwork {
 
 					// Update parameters with averaged deltas
 					paramAdjust();
-				}
-			}
+				};
+			};
 
 		};
 
@@ -346,6 +385,7 @@ class NeuralNetwork {
 
 		// Test network on array of images and output accuracy
 		void testVector(vector<Image>& images) {
+			cout << "Testing network on " << images.size() << " images" << endl;
 			int counter = 0;
 			int correct = 0;
 			for (auto& image : images) {
@@ -356,24 +396,6 @@ class NeuralNetwork {
 			};
 			accuracy = (float)correct * 100 / (float)counter;
 			cout << "Accuracy: " << accuracy << "%" << endl;
-		};
-
-		// Name network based on weights and biases and accuacy
-		string nameNetwork() {
-			string retString = "";
-			for (int l = 0; l < layers.size(); l++) {
-				retString += to_string(layers[l].neurons.size());
-				if (l += layers.size() - 1) {
-					retString += "-";
-				}
-
-			};
-			if (accuracy) {
-				retString += "_";
-				retString += to_string((int)accuracy);
-				retString += "pcnt";
-			};
-			return retString;
 		};
 
 		// Save the network to tensorflow compatable JSON

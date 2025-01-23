@@ -28,7 +28,7 @@ int main() {
     int start_index = 0;   // image index to start on
     int end_index = 60000; // image index to finish on
     int batch_size = 16;   // batch size for weight / bias adjustment
-    int epoch = 3;         // epoch number, how many times to review dataset
+    int epoch = 1;         // epoch number, how many times to review dataset
 	float alpha = 0.1;     // learning rate
 
     vector<Image> training_images = trainingImageData.getImageVector(start_index, end_index);
@@ -44,7 +44,6 @@ int main() {
     NeuralNetwork nn = NeuralNetwork(
         {
             trainingImageData.image_size,  // input (layer zero)
-            80,						       // layer one
             20,						       // layer two
             final_layer_count              // final layer (layer three)
         },
@@ -73,9 +72,8 @@ int main() {
     for (int i = start_index_test; i < end_index_test; i++) {
         test_images[i].setLabel(test_labels[i]);
     }
-
-    cout << "Testing network on " << test_images.size() << " images" << endl;
-
+    
+    // Test the new parameters on the training set
     nn.testVector(test_images);
 
     // Save network as a JSON object
