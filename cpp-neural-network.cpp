@@ -73,9 +73,8 @@ int main() {
     for (int i = start_index_test; i < end_index_test; i++) {
         test_images[i].setLabel(test_labels[i]);
     }
-
-    cout << "Testing network on " << test_images.size() << " images" << endl;
-
+    
+    // Test the new parameters on the training set
     nn.testVector(test_images);
 
     // Save network as a JSON object
