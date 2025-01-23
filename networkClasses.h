@@ -48,8 +48,8 @@ class Neuron {
 			};
 		};
 
-		void setValue(float value_in) {
-			value = value_in;
+		void setValue(float value) {
+			this->value = value;
 		};
 	
 		void setZ(float value) {
@@ -89,9 +89,9 @@ class NetworkLayer {
 		vector<Neuron> neurons;
 		string activation;
 		float alpha;
-		NetworkLayer(vector<int>& shape, int& index, string activation_in, float alpha_in) {
-			activation = activation_in;
-			alpha = alpha_in;
+		NetworkLayer(vector<int>& shape, int& index, string activation, float alpha) {
+			this->activation = activation;
+			this->alpha = alpha;
 			if (index < shape.size()) {
 				for (int i = 0; i < shape[index]; i++) {
 					neurons.push_back(Neuron(shape, index, i));
@@ -109,8 +109,8 @@ class NeuralNetwork {
 		// to initialise the NN
 		float alpha = 0.2;       // global learning rate
 		float accuracy = 0;      // to be set once trained
-		NeuralNetwork(vector<int> shape, string activation, float alpha_in) {
-			alpha = alpha_in;
+		NeuralNetwork(vector<int> shape, string activation, float alpha) {
+			this->alpha = alpha;
 			for (int i = 0; i < shape.size(); i++) {
 				if (i < shape.size() - 1) {
 					// determine activation function for hidden layers
