@@ -20,17 +20,17 @@ class Image {
 		char label = ' ';
 
 		// Innit image instance
-		Image(vector<uint8_t> image_data_in, int32_t num_rows_in, int32_t num_cols_in, int32_t image_size_in) {
-			image_data = image_data_in;
-			image_size = image_size_in;
-			num_rows = num_rows_in;
-			num_cols = num_cols_in;
+		Image(vector<uint8_t> image_data, int32_t num_rows, int32_t num_cols, int32_t image_size) {
+			this->image_data = image_data;
+			this->image_size = image_size;
+			this->num_rows = num_rows;
+			this->num_cols = num_cols;
 		};
 
 		// Test image from front end
-		Image(vector<uint8_t> image_data_in) {
+		Image(vector<uint8_t> image_data) {
 			// for testing
-			image_data = image_data_in;
+			this->image_data = image_data;
 			num_rows = 28;
 			num_cols = 28;
 		};
